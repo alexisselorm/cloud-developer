@@ -1,108 +1,93 @@
-import { DocumentClient } from 'aws-sdk/clients/dynamodb'
-import { TodoItem } from '../models/TodoItem'
 import * as AWS from 'aws-sdk'
+import { DocumentClient, Key } from 'aws-sdk/clients/dynamodb'
 
-const AWSXRay = require('aws-xray-sdk')
-const XAWS = AWSXRay.captureAWS(AWS)
+import { TodoItem, PageableTodoItems } from '../models/TodoItem'
+import { TodoUpdate } from '../models/TodoUpdate'
 
 export class TodoAccess {
-    constructor(
-        private readonly docClient: DocumentClient = new XAWS.DynamoDB.DocumentClient(),
-        private readonly todoTable = process.env.TODOS_TABLE){}
 
-    async getAllTodos(userId: string): Promise<TodoItem[]> {
-        console.log('Getting all todos')
+  constructor(
+    private readonly docClient: DocumentClient = createDynamoDBClient(),
+    private readonly todosTable = process.env.TODOS_TABLE,
+    private readonly userIdIndex = process.env.USER_ID_INDEX) {
+  }
 
-        const result = await this.docClient.query({
-            TableName: this.todoTable,
-            KeyConditionExpression: 'userId = :userId',
-            ExpressionAttributeValues: {
-                ':userId': userId
-            }
-          }).promise()
-          
-          const items = result.Items
+  async getTodo(userId: string, todoId: string): Promise<TodoItem> {
+    const result = await this.docClient
+      .get({
+        TableName: this.todosTable,
+        Key: { userId, todoId }
+      })
+      .promise()
 
-          return items as TodoItem[]
-        
-    }
-    async getTodo(userId: string, todoId: string): Promise<TodoItem[]> {
-        const result = await this.docClient.query({
-            TableName: this.todoTable,
-            KeyConditionExpression: 'userId = :userId AND todoId = :todoId',
-            ExpressionAttributeValues: {
-                ':userId': userId,
-                ':todoId': todoId
-            }
-          }).promise()
-          
-          const items = result.Items
+    return result.Item as TodoItem
+  }
 
-          return items as TodoItem[]
-          
-    }
-    async createTodo(todo: TodoItem): Promise<TodoItem> {
-        await this.docClient.put({
-            TableName: this.todoTable,
-            Item: todo,
-          }).promise()
-          
-        return todo
-        
-    }
-    async updateTodo(updatedTodo: any): Promise<TodoItem> {
-        await this.docClient.update({
-            TableName: this.todoTable,
-            Key: { 
-                todoId: updatedTodo.todoId, 
-                userId: updatedTodo.userId },
-            ExpressionAttributeNames: {"#N": "name"},
-            UpdateExpression: "set #N = :name, dueDate = :dueDate, done = :done",
-            ExpressionAttributeValues: {
-                ":name": updatedTodo.name,
-                ":dueDate": updatedTodo.dueDate,
-                ":done": updatedTodo.done,
-            },
-            ReturnValues: "UPDATED_NEW"
-        }).promise()
-          
-        return updatedTodo
-        
-    }
-    async updateTodoUrl(updatedTodo: any): Promise<TodoItem> {
-        await this.docClient.update({
-            TableName: this.todoTable,
-            Key: { 
-                todoId: updatedTodo.todoId, 
-                userId: updatedTodo.userId },
-            ExpressionAttributeNames: {"#A": "attachmentUrl"},
-            UpdateExpression: "set #A = :attachmentUrl",
-            ExpressionAttributeValues: {
-                ":attachmentUrl": updatedTodo.attachmentUrl,
-            },
-            ReturnValues: "UPDATED_NEW"
-        }).promise()
-          
-        return updatedTodo
-        
-    }
-    async removeTodo(userId: string, todoId: string) {
-        const params = {
-            TableName: this.todoTable,
-            Key: {
-              todoId, 
-              userId
-            }
-          }
-        await this.docClient.delete(params, function(err, data) {
-            if (err) {
-                console.error("Unable to delete item", JSON.stringify(err))
-            }
-            else {
-                console.log("DeleteItem succeeded", JSON.stringify(data))
-            }
-        }).promise()
-        
-    }
-    
+  async getAllTodos(userId: string, nextKey: Key, limit: number): Promise<PageableTodoItems> {
+    console.log('Getting all todos of a user')
+
+    const result = await this.docClient.query({
+      TableName: this.todosTable,
+      IndexName: this.userIdIndex,
+      KeyConditionExpression: 'userId = :userId',
+      ExpressionAttributeValues: {
+        ':userId': userId
+      },
+      ScanIndexForward: false,
+      Limit: limit,
+      ExclusiveStartKey: nextKey
+    }).promise()
+
+    const items = result.Items as TodoItem[]
+    return { todoItems: items, lastEvaluatedKey: result.LastEvaluatedKey }
+  }
+
+  async createTodo(newItem: TodoItem): Promise<TodoItem> {
+    await this.docClient.put({
+      TableName: this.todosTable,
+      Item: newItem
+    }).promise()
+
+    return newItem
+  }
+
+  async deleteTodo(userId: string, todoId: string): Promise<void> {
+    await this.docClient.delete({
+      TableName: this.todosTable,
+      Key: { userId, todoId }
+    }).promise()
+  }
+
+  async updateTodo(userId: string, todoId: string, updatedTodo: TodoUpdate): Promise<void> {
+    await this.docClient.update({
+      TableName: this.todosTable,
+      Key: { userId, todoId },
+      UpdateExpression: "set #name = :n, dueDate=:dueDate, done=:done",
+      ExpressionAttributeValues: {
+        ":n": updatedTodo.name,
+        ":dueDate": updatedTodo.dueDate,
+        ":done": updatedTodo.done
+      },
+      ExpressionAttributeNames: { '#name': 'name' },
+      ReturnValues: "NONE"
+    }).promise()
+  }
+
+
+  async updateAttachment(userId: string, todoId: string): Promise<void> {
+    await this.docClient.update({
+      TableName: this.todosTable,
+      Key: { userId, todoId },
+      UpdateExpression: "set attachmentUrl=:a",
+      ExpressionAttributeValues: {
+        ":a": todoId
+      },
+      ReturnValues: "NONE"
+    }).promise()
+  }
+
+}
+
+function createDynamoDBClient() {
+  return new AWS.DynamoDB.DocumentClient()
 }
