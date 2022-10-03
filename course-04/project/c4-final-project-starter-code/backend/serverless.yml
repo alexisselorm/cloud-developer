@@ -1,3 +1,5 @@
+org: alexisgb1738
+app: serverless-todo-app-app
 service: serverless-todo-app
 
 plugins:
