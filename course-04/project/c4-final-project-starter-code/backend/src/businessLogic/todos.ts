@@ -1,51 +1,54 @@
-import * as uuid from 'uuid'
-
+import { TodosAccess } from '../dataLayer/todosAcess'
+import { AttachmentUtils } from '../helpers/attachmentUtils';
 import { TodoItem } from '../models/TodoItem'
-import { TodoAccess } from '../dataLayer/todosAccess'
 import { CreateTodoRequest } from '../requests/CreateTodoRequest'
 import { UpdateTodoRequest } from '../requests/UpdateTodoRequest'
+import { createLogger } from '../utils/logger'
+import * as uuid from 'uuid'
+// import * as createError from 'http-errors'
 
-const todoAccess = new TodoAccess()
+// TODO: Implement businessLogic
+const todosAccess = new TodosAccess()
+const attachmentUtils = new AttachmentUtils()
 
-export async function getAllTodos(userId: string): Promise<TodoItem[]>{
-    return todoAccess.getAllTodos(userId)
-}
+const bucketName = process.env.ATTACHMENT_S3_BUCKET
+const urlExpiration = process.env.SIGNED_URL_EXPIRATION
 
-export async function getTodo(userId: string, todoId: string): Promise<TodoItem[]>{
-    return todoAccess.getTodo(userId, todoId)
-}
+const logger = createLogger('TodosAccess')
 
-export async function createTodo(createTodoRequest: CreateTodoRequest, userId: string): Promise<TodoItem>{
-    const createdAt = new Date().toISOString()
+export const createTodo = async (createTodoRequest: CreateTodoRequest, userId: string) => {
     const todoId = uuid.v4()
-    return await todoAccess.createTodo({
-        userId,
+    const newTodo: TodoItem = {
         todoId,
-        createdAt,
+        userId,
+        createdAt: new Date().toISOString(),
         name: createTodoRequest.name,
         dueDate: createTodoRequest.dueDate,
         done: false,
-    })
+        attachmentUrl: `https://${bucketName}.s3.amazonaws.com/${todoId}`
+    }
+
+    logger.info('creating todo' + JSON.stringify(newTodo))
+
+    await todosAccess.createTodo(newTodo)
+
+    return newTodo
 }
 
-export async function updateTodo(updateTodoRequest: UpdateTodoRequest, userId: string, todoId: string): Promise<TodoItem>{
-    return await todoAccess.updateTodo({
-        userId,
-        todoId,
-        name: updateTodoRequest.name,
-        dueDate: updateTodoRequest.dueDate,
-        done: updateTodoRequest.done
-    })
+export const deleteTodo = async (todoId: string, userId: string): Promise<void> => {
+    return await todosAccess.deleteTodo(todoId, userId)
 }
 
-export async function removeTodo(userId: string, todoId: string){
-    return await todoAccess.removeTodo(userId, todoId)
+export const createAttachmentPresignedUrl = async (todoId: string): Promise<string> => {
+    logger.info('creating attachment signed url')
+    return await attachmentUtils.getUploadUrl(bucketName, todoId, urlExpiration)
 }
 
-export async function updateTodoUrl(updateTodo, userId: string, todoId: string): Promise<TodoItem>{
-    return await todoAccess.updateTodoUrl({
-        userId,
-        todoId,
-        attachmentUrl: updateTodo.attachmentUrl,
-    })
+export const getTodosForUser = async (userId: string) => {
+    return await todosAccess.getTodosForUser(userId)
+}
+
+export const updateTodo = async (userId: string, todoId: string, updatedTodo: UpdateTodoRequest) => {
+    logger.info('calling update todo in todosAccess', updateTodo)
+    return await todosAccess.updateTodo(userId, todoId, updatedTodo)
 }

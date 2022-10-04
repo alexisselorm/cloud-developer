@@ -1,40 +1,32 @@
 import 'source-map-support/register'
 
 import { APIGatewayProxyEvent, APIGatewayProxyResult } from 'aws-lambda'
-import { UpdateTodoRequest } from '../../requests/UpdateTodoRequest'
-import { createLogger } from '../../utils/logger'
-import { getUserId } from '../utils'
-import { updateTodo } from '../../businessLogic/todos'
-import { getTodo } from '../../businessLogic/todos'
 import * as middy from 'middy'
-import { cors } from 'middy/middlewares'
+import { cors, httpErrorHandler } from 'middy/middlewares'
 
-const logger = createLogger('updateTodo')
+import { updateTodo } from '../../businessLogic/todos'
+import { UpdateTodoRequest } from '../../requests/UpdateTodoRequest'
+import { getUserId } from '../utils'
 
+export const handler = middy(
+  async (event: APIGatewayProxyEvent): Promise<APIGatewayProxyResult> => {
+    const todoId = event.pathParameters.todoId
+    const updatedTodo: UpdateTodoRequest = JSON.parse(event.body)
+    // TODO: Update a TODO item with the provided id using values in the "updatedTodo" object
+    const userId = getUserId(event)
+    await updateTodo(userId, todoId, updatedTodo)
 
-export const handler = middy(async (event: APIGatewayProxyEvent): Promise<APIGatewayProxyResult> => {
-  logger.info('Processing event: ', event)
-  const todoId = event.pathParameters.todoId
-  const userId = getUserId(event)
-  const updatedTodo: UpdateTodoRequest = JSON.parse(event.body)
-  
-  const item = await getTodo(userId, todoId)
-  if (item.length === 0){
     return {
-        statusCode: 404,
-        body: 'todoId does not exist'
-      }
+      statusCode: 200,
+      body: JSON.stringify(updateTodo)
+    }
   }
-
-  const items = await updateTodo(updatedTodo, userId, todoId)
-  return {
-    statusCode: 200,
-    body: JSON.stringify(items)
-  }
-})
-
-handler.use(
-  cors({
-    credentials: true
-  })
 )
+
+handler
+  .use(httpErrorHandler())
+  .use(
+    cors({
+      credentials: true
+    })
+  )

@@ -1,38 +1,30 @@
 import 'source-map-support/register'
+
 import { APIGatewayProxyEvent, APIGatewayProxyResult } from 'aws-lambda'
-import { getUserId } from '../utils'
-import { removeTodo } from '../../businessLogic/todos'
-import { createLogger } from '../../utils/logger'
-import { getTodo } from '../../businessLogic/todos'
 import * as middy from 'middy'
-import { cors } from 'middy/middlewares'
+import { cors, httpErrorHandler } from 'middy/middlewares'
 
-const logger = createLogger('deleteTodo')
+import { deleteTodo } from '../../businessLogic/todos'
+import { getUserId } from '../utils'
 
-export const handler = middy(async (event: APIGatewayProxyEvent): Promise<APIGatewayProxyResult> => {
-  const todoId = event.pathParameters.todoId
-  const userId = getUserId(event)
-  
-  //   Check if todoId exists
-  const item = await getTodo(userId, todoId)
+export const handler = middy(
+  async (event: APIGatewayProxyEvent): Promise<APIGatewayProxyResult> => {
+    const todoId = event.pathParameters.todoId
+    // TODO: Remove a TODO item by id
+    const userId = getUserId(event)
+    await deleteTodo(todoId, userId)
 
-  if (item.length === 0){
-    logger.info('Incorrect ID: ', todoId)
     return {
-        statusCode: 404,
-        body: 'todoId does not exist'
-      }
+      statusCode: 200,
+      body: ''
+    }
   }
-  await removeTodo(userId, todoId)
-
-  return {
-    statusCode: 200,
-    body: ''
-  }
-}) 
-
-handler.use(
-  cors({
-    credentials: true
-  })
 )
+
+handler
+  .use(httpErrorHandler())
+  .use(
+    cors({
+      credentials: true
+    })
+  )
