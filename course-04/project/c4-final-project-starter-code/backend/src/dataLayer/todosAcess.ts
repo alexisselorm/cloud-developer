@@ -35,7 +35,7 @@ export class TodosAccess {
       TableName: this.TodosTable,
       Item: todo
     }).promise()
-    logger.info('Successfully creadted todo ', todo.todoId)
+    logger.info('Successfully created todo ', todo.todoId)
     return todo
   }
 
@@ -53,7 +53,7 @@ export class TodosAccess {
 
  
   async getTodosForUser(userId): Promise<TodoItem[]> {
-    logger.info('Getting todo', userId)
+    logger.info('Getting todo for the user', userId)
     let result = await this.docClient.query({
         TableName: this.TodosTable,
         IndexName: this.TodosIndex,
@@ -83,7 +83,7 @@ export class TodosAccess {
 
  
   async updateTodo(userId, todoId, updatedTodo): Promise<any> {
-    logger.info('Update Todo item ', userId, todoId);
+    logger.info('Update todo item ', userId, todoId);
     await this.docClient.update({
       TableName: this.TodosTable,
       Key: {
@@ -106,7 +106,7 @@ export class TodosAccess {
 
  
   async updateImageURl(todoId, userId, imageUrl): Promise<any> {
-    logger.info('Update Todo Image Url ');
+    logger.info('Update todo image ');
     await this.docClient.update({
       TableName: this.TodosTable,
       Key: {
