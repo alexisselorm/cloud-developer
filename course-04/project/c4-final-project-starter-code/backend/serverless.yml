@@ -7,6 +7,16 @@ plugins:
   - serverless-webpack
   - serverless-iam-roles-per-function
   - serverless-plugin-tracing
+  - serverless-reqvalidator-plugin
+  - serverless-aws-documentation
+
+custom:
+  documentation:
+    api:
+      info:
+        version: '1.0.0'
+        title: serverless-todo
+        description: serverless-todo
 
 provider:
   name: aws
@@ -24,7 +34,7 @@ provider:
     TODOS_TABLE: Todos-${self:provider.stage}
     TODOS_CREATED_AT_INDEX: CreatedAtIndex
     ATTACHMENT_S3_BUCKET: alexis-serverless-todos-bucket-${self:provider.stage}
-    # SIGNED_URL_EXPIRATION: 300
+    SIGNED_URL_EXPIRATION: 300
 
   logs:
     # Enable API Gateway logs
@@ -170,12 +180,17 @@ functions:
           path: todos/{todoId}/attachment
           cors: true
           authorizer: Auth
+    iamRoleStatementsInherit: true
     iamRoleStatements:
-     - Effect: Allow
-       Action: 
-         - s3: PutObject
-         - s3: GetObject
-       Resource: 'arn:aws:s3:::${self:provider.environment.ATTACHMENT_S3_BUCKET}/*'
+      - Effect: Allow
+        Action:
+          - dynamodb:UpdateItem
+        Resource: arn:aws:dynamodb:${self:provider.region}:*:table/${self:provider.environment.TODOS_TABLE}
+      - Effect: Allow
+        Action:
+          - s3:PutObject
+          - s3:GetObject
+        Resource: arn:aws:s3:::${self:provider.environment.ATTACHMENT_S3_BUCKET}/*
 
 resources:
   Resources:

@@ -35,7 +35,7 @@ export async function createTodo(
 
     })
   } catch (err) {
-    createError('Unable to create TODO item')
+    createError('Unable to create todo')
   }
 
   
