@@ -9,26 +9,26 @@ plugins:
   - serverless-plugin-tracing
   - serverless-aws-documentation
 
-provider:
-  name: aws
-  runtime: nodejs12.x
-
 custom:
   documentation:
     api:
       info:
         version: v1.0.0
         title: Udagram API
-        description: serveless app for image sharing
+        description: serveless todo app
 
     models:
-      - name: Create Todo Request
+      - name: CreateTodoRequest
         contentType: "application/json"
         schema: ${file(models/create-todo-model.json)}
 
-      - name: Update Todo Request
+      - name: UpdateTodoRequest
         contentType: "application/json"
         schema: ${file(models/update-todo-model.json)}
+
+provider:
+  name: aws
+  runtime: nodejs12.x
 
   stage: ${opt:stage, 'dev'}
   region: ${opt:region, 'us-east-1'}
