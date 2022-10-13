@@ -1,16 +1,16 @@
-import { TodosAccess } from '../dataLayer/todosAcess'
+import * as createError from 'http-errors'
 import { AttachmentUtil } from '../helpers/attachmentUtil';
+import { TodosAccess } from '../dataLayer/todosAcess'
 import { TodoItem } from '../models/TodoItem'
 import { CreateTodoRequest } from '../requests/CreateTodoRequest'
-import * as createError from 'http-errors'
 import { UpdateTodoRequest } from '../requests/UpdateTodoRequest'
 import { createLogger } from '../utils/logger'
 import * as uuid from 'uuid'
 
 
 const logger = createLogger('TodosAccess')
-const todoAccess = new TodosAccess()
 const attachmentUtils = new AttachmentUtil();
+const todoAccess = new TodosAccess()
 
 export async function getAllTodos(): Promise<TodoItem[]> {
   return todoAccess.getAllTodos()
