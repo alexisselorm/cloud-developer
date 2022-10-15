@@ -9,6 +9,7 @@ plugins:
   - serverless-plugin-tracing
   - serverless-aws-documentation
 
+
 custom:
   documentation:
     api:
@@ -44,6 +45,7 @@ provider:
     TODOS_CREATED_AT_INDEX: CreatedAtIndex
     ATTACHMENT_S3_BUCKET: alexis-serverless-todos-bucket-${self:provider.stage}
     SIGNED_URL_EXPIRATION: 300
+    AUTH0SECRET: uTPy5YPEAv6Wyrz8eUWaQ_Kcu8llqLZjBRN6dQ_xDDmxEm_gUjV-uxpBSVYIYxkw
 
   logs:
     # Enable API Gateway logs
