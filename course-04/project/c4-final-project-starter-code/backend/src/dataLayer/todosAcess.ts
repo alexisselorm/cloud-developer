@@ -18,16 +18,19 @@ export class TodosAccess {
 
   async getAllTodos(): Promise<TodoItem[]> {
     
-    logger.info('Fetching todos')
-
-    const result = await this.docClient.scan({
-      TableName: this.TodosTable
-    }).promise()
-
-    const items = result.Items
-    return items as TodoItem[]
-  }
-
+    try {
+      logger.info('Fetching todos')
+  
+      const result = await this.docClient.scan({
+        TableName: this.TodosTable
+      }).promise()
+  
+      const items = result.Items
+      return items as TodoItem[]
+    }catch (error) {
+     logger.error(error) 
+    }
+    } 
  
   async createTodo(todo: TodoItem): Promise<TodoItem> {
     logger.info('Creating todo ', todo.todoId)
