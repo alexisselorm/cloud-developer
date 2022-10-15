@@ -84,7 +84,7 @@ export async function createAttachmentPresignedUrl(
   userId : string
 ): Promise<any>{
   let generatedPreSignedUrl = await attachmentUtils.generatePreSignedUrl(todoId, userId);
-  let imageUrl = `https://${process.env.ATTACHMENT_S3_BUCKET}.s3.amazonaws.com/images/${todoId}`;
-  await todoAccess.updateImageURl(todoId, userId, imageUrl);
+  // let imageUrl = `https://${process.env.ATTACHMENT_S3_BUCKET}.s3.amazonaws.com/images/${todoId}`;
+  // await todoAccess.updateImageURl(todoId, userId, imageUrl);
   return generatedPreSignedUrl;
 }

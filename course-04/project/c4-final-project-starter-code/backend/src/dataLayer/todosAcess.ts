@@ -108,21 +108,21 @@ export class TodosAccess {
   }
 
  
-  async updateImageURl(todoId, userId, imageUrl): Promise<any> {
-    logger.info('Update todo image ');
-    await this.docClient.update({
-      TableName: this.TodosTable,
-      Key: {
-          todoId,
-          userId
-      },
-      UpdateExpression: 'set #attachmentUrl = :n',
-      ExpressionAttributeValues: {
-          ':n': imageUrl,
-      },
-      ExpressionAttributeNames: {
-          '#attachmentUrl': 'attachmentUrl'
-      }
-    }).promise()
-  }
+  // async updateImageURl(todoId, userId, imageUrl): Promise<any> {
+  //   logger.info('Update todo image ');
+  //   await this.docClient.update({
+  //     TableName: this.TodosTable,
+  //     Key: {
+  //         todoId,
+  //         userId
+  //     },
+  //     UpdateExpression: 'set #attachmentUrl = :n',
+  //     ExpressionAttributeValues: {
+  //         ':n': imageUrl,
+  //     },
+  //     ExpressionAttributeNames: {
+  //         '#attachmentUrl': 'attachmentUrl'
+  //     }
+  //   }).promise()
+  // }
 }
