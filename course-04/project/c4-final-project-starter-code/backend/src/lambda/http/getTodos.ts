@@ -13,16 +13,21 @@ logger.info('I made it here!')
 // TODO: Get all TODO items for a current user
 export const handler :APIGatewayProxyHandler=
   async (event: APIGatewayProxyEvent): Promise<APIGatewayProxyResult> => {
-    logger.info('get todos event: ', JSON.stringify(event))
+    try{
+      logger.info('get todos event: ', JSON.stringify(event))
     
-    const userId = getUserId(event)
-    const todos = await getTodosForUser(userId)
-
-    return {statusCode:200,
-    body: JSON.stringify({items:todos}),
-    headers: {
-      'Access-Control-Allow-Origin': '*',
-      'Access-Control-Allow-Credentials': true
+      const userId = getUserId(event)
+      const todos = await getTodosForUser(userId)
+  
+      return {statusCode:200,
+      body: JSON.stringify({items:todos}),
+      headers: {
+        'Access-Control-Allow-Origin': '*',
+        'Access-Control-Allow-Credentials': true
+      }
     }
-  }
+    }catch(e){
+      logger.error({error: e.message,e})
+    }
+    
   }
