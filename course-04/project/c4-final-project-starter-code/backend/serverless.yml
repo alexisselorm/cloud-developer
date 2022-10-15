@@ -81,6 +81,7 @@ functions:
     iamRoleStatements:
       - Effect: Allow
         Action:
+          - dynamodb:GetItem
           - dynamodb:Query
         Resource: arn:aws:dynamodb:${self:provider.region}:*:table/${self:provider.environment.TODOS_TABLE}/index/${self:provider.environment.TODOS_CREATED_AT_INDEX}
 
@@ -102,6 +103,7 @@ functions:
     iamRoleStatements:
       - Effect: Allow
         Action:
+          - dynamodb:GetItem
           - dynamodb:PutItem
         Resource: arn:aws:dynamodb:${self:provider.region}:*:table/${self:provider.environment.TODOS_TABLE}
 
@@ -121,6 +123,7 @@ functions:
     iamRoleStatements:
       - Effect: Allow
         Action:
+          - dynamodb:GetItem
           - dynamodb:UpdateItem
         Resource: arn:aws:dynamodb:${self:provider.region}:*:table/${self:provider.environment.TODOS_TABLE}
 
@@ -137,6 +140,7 @@ functions:
     iamRoleStatements:
       - Effect: Allow
         Action:
+          - dynamodb:GetItem
           - dynamodb:DeleteItem
         Resource: arn:aws:dynamodb:${self:provider.region}:*:table/${self:provider.environment.TODOS_TABLE}
 
@@ -155,6 +159,7 @@ functions:
         Action:
           - s3:PutObject
           - s3:GetObject
+          - dynamodb:UpdateItem
         Resource: arn:aws:s3:::${self:provider.environment.ATTACHMENT_S3_BUCKET}/*
 
 resources:

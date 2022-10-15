@@ -9,7 +9,6 @@ import { getUserId } from '../utils';
 import {createLogger} from '../../utils/logger'
 
 const logger = createLogger('getTodos')
-logger.info('I made it here!')
 // TODO: Get all TODO items for a current user
 export const handler :APIGatewayProxyHandler=
   async (event: APIGatewayProxyEvent): Promise<APIGatewayProxyResult> => {
