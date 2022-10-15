@@ -8,6 +8,8 @@ plugins:
   - serverless-iam-roles-per-function
   - serverless-plugin-tracing
   - serverless-aws-documentation
+  # FOR OFFLINE DEBUGGING
+  # - serverless-offline
 
 
 custom:
