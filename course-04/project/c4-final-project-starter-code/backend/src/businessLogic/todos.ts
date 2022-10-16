@@ -31,6 +31,7 @@ export async function createTodo(
       userId: userId,
       createdAt: new Date().toISOString(),
       done: false,
+      attachmentUrl: `https://${process.env.ATTACHMENT_S3_BUCKET}.s3.amazonaws.com/images/${itemId}`,
       ... CreateTodoRequest
 
     })

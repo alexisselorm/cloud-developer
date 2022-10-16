@@ -20,8 +20,8 @@ export class TodosAccess {
     
     try {
       logger.info('Fetching todos')
-  
-      const result = await this.docClient.scan({
+
+      const result = await this.docClient.query({
         TableName: this.TodosTable
       }).promise()
   
