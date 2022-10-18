@@ -45,7 +45,7 @@ provider:
   environment:
     TODOS_TABLE: Todos-${self:provider.stage}
     TODOS_CREATED_AT_INDEX: CreatedAtIndex
-    ATTACHMENT_S3_BUCKET: alexis-serverless-todos-bucket-${self:provider.stage}
+    ATTACHMENT_S3_BUCKET: alexis-serverless-todos-bucket-debug-to-check-cors${self:provider.stage}
     SIGNED_URL_EXPIRATION: 300
     AUTH0SECRET: uTPy5YPEAv6Wyrz8eUWaQ_Kcu8llqLZjBRN6dQ_xDDmxEm_gUjV-uxpBSVYIYxkw
 
@@ -235,7 +235,7 @@ resources:
       Properties:
         PolicyDocument:
           Id: MyPolicy
-          Version: "2012-10-17"
+          Version: '2012-10-17'
           Statement:
             - Sid: PublicReadForGetBucketObjects
               Effect: Allow
@@ -243,6 +243,7 @@ resources:
               Action: 's3:GetObject'
               Resource: 'arn:aws:s3:::${self:provider.environment.ATTACHMENT_S3_BUCKET}/*'
         Bucket: !Ref AttachmentsBucket
+
 
     RequestBodyValidator:
       Type: AWS::ApiGateway::RequestValidator
